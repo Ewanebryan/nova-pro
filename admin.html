@@ -65,6 +65,9 @@
     </div>
 
     <script>
+        // POINTING TO YOUR NEW LIVE BACKEND
+        const API_URL = "https://nova-pro.onrender.com";
+
         document.getElementById('productForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -82,24 +85,26 @@
             };
 
             // Loading state
-            submitBtn.innerText = "Uploading...";
+            submitBtn.innerText = "Uploading to Cloud...";
             submitBtn.disabled = true;
 
             try {
-                const response = await fetch('http://localhost:5000/api/products', {
+                // Now fetching from the Render URL
+                const response = await fetch(`${API_URL}/api/products`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(productData)
                 });
 
                 if (response.ok) {
-                    showStatus("✅ Product added successfully!", "bg-green-50 text-green-600");
+                    showStatus("✅ Product added to Cloud Database!", "bg-green-50 text-green-600");
                     document.getElementById('productForm').reset();
                 } else {
                     throw new Error("Failed to save product");
                 }
             } catch (err) {
-                showStatus("❌ Error: Server not responding.", "bg-red-50 text-red-600");
+                console.error(err);
+                showStatus("❌ Error: Cloud server not responding. Wait 30s for it to wake up.", "bg-red-50 text-red-600");
             } finally {
                 submitBtn.innerText = "Upload to Database";
                 submitBtn.disabled = false;
