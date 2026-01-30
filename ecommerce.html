@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NOVA Pro | Premium E-Commerce</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; scroll-behavior: smooth; -webkit-tap-highlight-color: transparent; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .active-cat { background-color: #4f46e5 !important; color: white !important; border-color: #4f46e5 !important; }
+        .scale-in-center { animation: scale-in-center 0.3s cubic-bezier(0.250, 0.460, 0.450, 0.940) both; }
+        @keyframes scale-in-center { 0% { transform: scale(0); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+
+    <nav class="bg-white/80 backdrop-blur-md border-b sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex justify-between items-center">
+            <div class="flex items-center gap-8">
+                <span class="text-2xl font-extrabold text-indigo-600 cursor-pointer" onclick="location.reload()">NOVA<span class="text-slate-800">PRO</span></span>
+                <div class="hidden md:flex items-center bg-slate-100 px-4 py-2 rounded-xl w-64 border focus-within:border-indigo-500 transition">
+                    <input type="text" id="searchInput" onkeyup="searchProducts()" placeholder="Search items..." class="bg-transparent border-none outline-none text-sm w-full">
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <a href="admin.html" title="Open Admin Panel" class="p-2.5 rounded-xl border border-slate-200 hover:bg-slate-100 transition flex items-center gap-2 text-sm font-bold text-slate-600">
+                    <span class="text-lg">⚙️</span>
+                    <span class="hidden sm:inline">Admin</span>
+                </a>
+
+                <button onclick="toggleCart()" class="relative bg-slate-900 text-white p-2.5 rounded-xl shadow-lg hover:bg-indigo-600 transition">
+                    🛒 <span id="cart-count" class="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full font-bold">0</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <section class="py-10 px-4 max-w-7xl mx-auto">
+        <div class="flex space-x-3 overflow-x-auto no-scrollbar pb-2" id="categoryBar">
+            <button onclick="filterCategory('All')" class="cat-btn active-cat border px-6 py-2.5 rounded-xl font-bold transition whitespace-nowrap">All Items</button>
+            <button onclick="filterCategory('Tech')" class="cat-btn bg-white border text-slate-600 px-6 py-2.5 rounded-xl font-bold hover:bg-slate-50 transition whitespace-nowrap">Technology</button>
+            <button onclick="filterCategory('Fashion')" class="cat-btn bg-white border text-slate-600 px-6 py-2.5 rounded-xl font-bold hover:bg-slate-50 transition whitespace-nowrap">Fashion</button>
+            <button onclick="filterCategory('Home')" class="cat-btn bg-white border text-slate-600 px-6 py-2.5 rounded-xl font-bold hover:bg-slate-50 transition whitespace-nowrap">Home Decor</button>
+        </div>
+    </section>
+
+    <main class="max-w-7xl mx-auto px-4 pb-24">
+        <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6" id="productGrid"></div>
+    </main>
+
+    <div id="cartOverlay" class="fixed inset-0 bg-black/40 z-[60] hidden backdrop-blur-sm" onclick="toggleCart()"></div>
+    <div id="cartSidebar" class="fixed inset-y-0 right-0 w-full max-w-md bg-white z-[70] shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col">
+        <div class="p-6 border-b flex justify-between items-center bg-slate-50">
+            <h2 class="text-xl font-extrabold text-slate-800">Your Selection</h2>
+            <button onclick="toggleCart()" class="text-slate-400 hover:text-black text-2xl">✕</button>
+        </div>
+        <div id="cartList" class="flex-grow overflow-y-auto p-6 space-y-4"></div>
+        <div class="p-6 border-t bg-slate-50 space-y-3">
+            <div class="flex justify-between text-xl font-extrabold mb-4">
+                <span>Subtotal</span>
+                <span id="cartTotal" class="text-indigo-600">$0.00</span>
+            </div>
+            
+            <button onclick="initiatePayment('MOMO')" class="w-full bg-[#FFCC00] text-slate-900 py-4 rounded-2xl font-black flex items-center justify-center gap-3 hover:brightness-105 transition shadow-lg">
+                <span class="bg-[#004f9f] text-white px-2 py-0.5 rounded text-[10px]">MTN</span> Pay with MoMo
+            </button>
+            
+            <button onclick="initiatePayment('OM')" class="w-full bg-[#FF6600] text-white py-4 rounded-2xl font-black flex items-center justify-center gap-3 hover:brightness-110 transition shadow-lg">
+                <span class="bg-white text-[#FF6600] px-2 py-0.5 rounded text-[10px]">OM</span> Pay with Orange
+            </button>
+
+            <button onclick="checkoutWhatsApp()" class="w-full text-slate-400 text-sm font-bold py-2 hover:text-green-600 transition">
+                Order via WhatsApp 💬
+            </button>
+        </div>
+    </div>
+
+    <div id="detailModal" class="fixed inset-0 bg-black/60 z-[80] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-2xl rounded-3xl overflow-hidden relative flex flex-col md:flex-row shadow-2xl scale-in-center">
+            <button onclick="closeModal()" class="absolute top-4 right-4 bg-white/80 rounded-full p-2 hover:bg-white transition z-10 shadow">✕</button>
+            <div class="md:w-1/2 h-64 md:h-auto">
+                <img id="modalImg" src="" class="w-full h-full object-cover">
+            </div>
+            <div class="md:w-1/2 p-8 flex flex-col justify-center">
+                <span id="modalCat" class="text-indigo-600 font-bold text-xs uppercase tracking-widest mb-2"></span>
+                <h2 id="modalTitle" class="text-3xl font-extrabold mb-4 text-slate-800"></h2>
+                <p id="modalDesc" class="text-slate-500 mb-6 leading-relaxed"></p>
+                <p id="modalPrice" class="text-3xl font-black text-slate-900 mb-8"></p>
+                <button id="modalAddBtn" class="bg-indigo-600 text-white py-4 rounded-xl font-bold hover:bg-indigo-700 transition shadow-lg shadow-indigo-100">Add to Cart</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const HOTSPOT_IP = "172.20.10.5"; // YOUR IP
+        let cart = [];
+        let allProducts = [];
+
+        async function loadProductsFromDB() {
+            const grid = document.getElementById('productGrid');
+            try {
+                // Connecting to your laptop's IP so iPhone can see it
+                const response = await fetch(`http://${HOTSPOT_IP}:5000/api/products`);
+                if (!response.ok) throw new Error('Backend Offline');
+                allProducts = await response.json();
+                
+                if (allProducts.length === 0) {
+                    grid.innerHTML = `<div class="col-span-full text-center py-20 text-slate-400">Empty Store.</div>`;
+                } else {
+                    render(allProducts);
+                }
+            } catch (error) {
+                grid.innerHTML = `<div class="col-span-full text-center py-20 text-red-500">Check if node server.js is running.</div>`;
+            }
+        }
+
+        function render(data) {
+            const grid = document.getElementById('productGrid');
+            grid.innerHTML = data.map(p => `
+                <div class="bg-white rounded-2xl p-3 border border-slate-100 hover:shadow-xl transition-all group">
+                    <div class="h-40 sm:h-56 rounded-xl overflow-hidden mb-3 relative cursor-pointer" onclick="openModal('${p._id}')">
+                        <img src="${p.img}" class="w-full h-full object-cover group-hover:scale-110 transition" onerror="this.src='https://placehold.co/400?text=No+Image'">
+                        <span class="absolute top-2 left-2 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-[9px] font-bold uppercase text-indigo-600">${p.cat}</span>
+                    </div>
+                    <h3 class="font-bold text-slate-800 truncate text-sm sm:text-base">${p.name}</h3>
+                    <div class="flex justify-between items-center mt-2">
+                        <span class="text-lg font-black text-indigo-600">$${p.price}</span>
+                        <button onclick="addToCart('${p._id}')" class="bg-slate-900 text-white w-8 h-8 rounded-lg hover:bg-indigo-600 transition flex items-center justify-center font-bold">+</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function initiatePayment(method) {
+            if(cart.length === 0) return alert("Cart is empty!");
+            
+            const phoneNumber = prompt(`Enter your ${method === 'OM' ? 'Orange' : 'MTN'} number (e.g. 677123456):`);
+            if(!phoneNumber) return;
+
+            const totalUSD = cart.reduce((sum, item) => sum + item.price, 0);
+            const amountXAF = totalUSD * 650; // Standard conversion
+
+            try {
+                const response = await fetch(`http://${HOTSPOT_IP}:5000/api/pay`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        amount: amountXAF,
+                        phoneNumber: "237" + phoneNumber,
+                        method: method
+                    })
+                });
+                
+                const result = await response.json();
+                if(result.success) {
+                    alert("✅ Request Sent! Check your phone for the PIN prompt.");
+                } else {
+                    alert("❌ Payment error. Please try WhatsApp checkout.");
+                }
+            } catch (err) {
+                alert("❌ Cannot connect to server.");
+            }
+        }
+
+        function openModal(id) {
+            const p = allProducts.find(item => item._id === id);
+            if(!p) return;
+            document.getElementById('modalImg').src = p.img;
+            document.getElementById('modalTitle').innerText = p.name;
+            document.getElementById('modalCat').innerText = p.cat;
+            document.getElementById('modalDesc').innerText = p.desc || "Premium Nova Pro item.";
+            document.getElementById('modalPrice').innerText = `$${p.price}`;
+            document.getElementById('modalAddBtn').onclick = () => { addToCart(id); closeModal(); };
+            document.getElementById('detailModal').classList.remove('hidden');
+        }
+
+        function closeModal() { document.getElementById('detailModal').classList.add('hidden'); }
+
+        function addToCart(id) {
+            const p = allProducts.find(prod => prod._id === id);
+            if(p) { cart.push(p); updateCartUI(); }
+        }
+
+        function updateCartUI() {
+            document.getElementById('cart-count').innerText = cart.length;
+            const list = document.getElementById('cartList');
+            list.innerHTML = cart.map((item, i) => `
+                <div class="flex gap-4 bg-slate-50 p-3 rounded-2xl border">
+                    <img src="${item.img}" class="w-12 h-12 rounded-lg object-cover">
+                    <div class="flex-grow text-sm">
+                        <h4 class="font-bold">${item.name}</h4>
+                        <p class="text-indigo-600 font-black">$${item.price}</p>
+                    </div>
+                    <button onclick="remove(${i})" class="text-slate-300">✕</button>
+                </div>
+            `).join('');
+            const total = cart.reduce((sum, item) => sum + item.price, 0);
+            document.getElementById('cartTotal').innerText = `$${total.toFixed(2)}`;
+        }
+
+        function remove(i) { cart.splice(i, 1); updateCartUI(); }
+        function toggleCart() {
+            document.getElementById('cartSidebar').classList.toggle('translate-x-full');
+            document.getElementById('cartOverlay').classList.toggle('hidden');
+        }
+
+        function filterCategory(cat) {
+            document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active-cat'));
+            if(event) event.target.classList.add('active-cat');
+            const filtered = cat === 'All' ? allProducts : allProducts.filter(p => p.cat.toLowerCase() === cat.toLowerCase());
+            render(filtered);
+        }
+
+        function searchProducts() {
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allProducts.filter(p => p.name.toLowerCase().includes(term));
+            render(filtered);
+        }
+
+        function checkoutWhatsApp() {
+            const phone = "237681162094"; 
+            let msg = "🛍️ *New Order* \n";
+            cart.forEach((item) => msg += `- ${item.name} ($${item.price})\n`);
+            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        window.onload = loadProductsFromDB;
+    </script>
+</body>
+</html>
